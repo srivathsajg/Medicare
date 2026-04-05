@@ -1,32 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Send, User, Bot, ArrowLeft, HeartPulse, Sparkles, UserCircle } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
+import { io, Socket } from 'socket.io-client';
 
 interface Chat {
-  id: string;
-  sender: 'user' | 'doctor';
+  _id: string;
+  senderId: string;
+  receiverId: string;
   text: string;
-  time: string;
+  createdAt: string;
+}
+
+interface Contact {
+  _id: string;
+  name: string;
+  role: string;
+  specialization?: string;
 }
 
 export const Messages = () => {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Chat[]>([
-    { id: '1', sender: 'doctor', text: 'Hello, I have reviewed your latest test results. Everything looks good, but please ensure you are staying hydrated.', time: '10:00 AM' },
-    { id: '2', sender: 'user', text: 'Thank you Doctor. I will make sure to drink more water.', time: '10:05 AM' }
-  ]);
+  const [messages, setMessages] = useState<Chat[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [activeContact, setActiveContact] = useState<Contact | null>(null);
   const [input, setInput] = useState('');
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const res = await fetch('/api/messages/contacts', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setContacts(data.data);
+          if (data.data.length > 0) {
+            setActiveContact(data.data[0]);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchContacts();
+  }, [token]);
+
+  useEffect(() => {
+    if (!activeContact) return;
+    const fetchMessages = async () => {
+      try {
+        const res = await fetch(`/api/messages/${activeContact._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setMessages(data.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchMessages();
+  }, [activeContact, token]);
+
+  useEffect(() => {
+    const newSocket = io('/', {
+      auth: { token }
+    });
+
+    newSocket.on('receiveMessage', (message: Chat) => {
+      setMessages(prev => [...prev, message]);
+    });
+
+    newSocket.on('messageSent', (message: Chat) => {
+      setMessages(prev => [...prev, message]);
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [token]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !socket || !activeContact) return;
     
-    setMessages(prev => [
-      ...prev,
-      { id: Date.now().toString(), sender: 'user', text: input.trim(), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }
-    ]);
+    socket.emit('sendMessage', {
+      receiverId: activeContact._id,
+      text: input.trim()
+    });
+    
     setInput('');
   };
 
@@ -41,94 +114,113 @@ export const Messages = () => {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          <div className="bg-white p-3 rounded-xl shadow-sm border border-sky-100 cursor-pointer relative overflow-hidden group transition-all hover:shadow-md">
-            <div className="absolute top-0 left-0 w-1 h-full bg-sky-500 rounded-l-xl"></div>
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold">
-                D
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <h3 className="text-sm font-semibold text-slate-900 truncate">Dr. Sarah Smith</h3>
-                  <span className="text-xs text-sky-500 font-medium">10:05 AM</span>
+          {contacts.map(contact => (
+            <div 
+              key={contact._id}
+              onClick={() => setActiveContact(contact)}
+              className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                activeContact?._id === contact._id 
+                  ? 'bg-white shadow-sm border-sky-200 relative overflow-hidden group' 
+                  : 'border-transparent hover:bg-white/50'
+              }`}
+            >
+              {activeContact?._id === contact._id && (
+                <div className="absolute top-0 left-0 w-1 h-full bg-sky-500 rounded-l-xl"></div>
+              )}
+              <div className="flex items-center space-x-3">
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center font-bold ${
+                  activeContact?._id === contact._id ? 'bg-indigo-100 text-indigo-600' : 'bg-sky-100 text-sky-600'
+                }`}>
+                  {contact.name.charAt(0)}
                 </div>
-                <p className="text-xs text-slate-500 truncate">Thank you Doctor. I will make sure...</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-baseline mb-0.5">
+                    <h3 className="text-sm font-semibold text-slate-900 truncate">
+                      {contact.role === 'doctor' ? `Dr. ${contact.name}` : contact.name}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-slate-500 truncate">
+                    {contact.specialization || 'Patient'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="p-3 rounded-xl border border-transparent hover:bg-white/50 cursor-pointer transition-colors">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold">
-                J
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <h3 className="text-sm font-medium text-slate-900 truncate">Dr. John Doe</h3>
-                  <span className="text-xs text-slate-400">Yesterday</span>
-                </div>
-                <p className="text-xs text-slate-500 truncate">Your prescription is ready for pickup.</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col bg-white/40">
-        <div className="bg-white/60 backdrop-blur-md border-b border-white/50 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <button onClick={() => navigate(-1)} className="md:hidden mr-4 text-slate-400 hover:text-slate-600">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3 relative shadow-sm">
-              <UserCircle className="w-6 h-6 text-indigo-600" />
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Dr. Sarah Smith</h2>
-              <p className="text-xs text-slate-500 font-medium">Cardiologist</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          <div className="text-center my-4">
-            <span className="bg-slate-100 text-slate-500 text-xs px-3 py-1 rounded-full font-medium">Today</span>
-          </div>
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex max-w-[70%] flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`px-4 py-3 rounded-2xl shadow-sm ${
-                  msg.sender === 'user' 
-                    ? 'bg-sky-500 text-white rounded-tr-none' 
-                    : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'
-                }`}>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+        {activeContact ? (
+          <>
+            <div className="bg-white/60 backdrop-blur-md border-b border-white/50 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <button onClick={() => navigate(-1)} className="md:hidden mr-4 text-slate-400 hover:text-slate-600">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div className="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3 relative shadow-sm">
+                  <UserCircle className="w-6 h-6 text-indigo-600" />
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                 </div>
-                <span className="text-[10px] text-slate-400 mt-1 px-1">{msg.time}</span>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">
+                    {activeContact.role === 'doctor' ? `Dr. ${activeContact.name}` : activeContact.name}
+                  </h2>
+                  <p className="text-xs text-slate-500 font-medium">{activeContact.specialization || 'Patient'}</p>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
 
-        <div className="bg-white/80 border-t border-white/50 p-4">
-          <form onSubmit={handleSend} className="flex items-center space-x-3">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-1 bg-white border border-slate-200 rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all shadow-inner"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim()}
-              className="bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 disabled:opacity-50 text-white h-12 w-12 rounded-full flex items-center justify-center transition-all shadow-md"
-            >
-              <Send className="w-5 h-5 ml-1" />
-            </button>
-          </form>
-        </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="text-center my-4">
+                <span className="bg-slate-100 text-slate-500 text-xs px-3 py-1 rounded-full font-medium">Today</span>
+              </div>
+              {messages.map((msg) => {
+                const isUser = msg.senderId === user?.id;
+                return (
+                  <div key={msg._id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`flex max-w-[70%] flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+                      <div className={`px-4 py-3 rounded-2xl shadow-sm ${
+                        isUser 
+                          ? 'bg-sky-500 text-white rounded-tr-none' 
+                          : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'
+                      }`}>
+                        <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                      </div>
+                      <span className="text-[10px] text-slate-400 mt-1 px-1">
+                        {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+
+            <div className="bg-white/80 border-t border-white/50 p-4">
+              <form onSubmit={handleSend} className="flex items-center space-x-3">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type your message..."
+                  className="flex-1 bg-white border border-slate-200 rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all shadow-inner"
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim()}
+                  className="bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 disabled:opacity-50 text-white h-12 w-12 rounded-full flex items-center justify-center transition-all shadow-md"
+                >
+                  <Send className="w-5 h-5 ml-1" />
+                </button>
+              </form>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-slate-500">
+            Select a conversation to start chatting
+          </div>
+        )}
       </div>
     </div>
   );

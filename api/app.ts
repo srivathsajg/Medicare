@@ -16,6 +16,7 @@ import appointmentsRoutes from './routes/appointments.js'
 import recordsRoutes from './routes/records.js'
 import aiRoutes from './routes/ai.js'
 import usersRoutes from './routes/users.js'
+import messagesRoutes from './routes/messages.js'
 import { connectDB } from './db.js'
 
 // for esm mode
@@ -42,6 +43,7 @@ app.use('/api/appointments', appointmentsRoutes)
 app.use('/api/records', recordsRoutes)
 app.use('/api/ai', aiRoutes)
 app.use('/api/users', usersRoutes)
+app.use('/api/messages', messagesRoutes)
 
 /**
  * health
