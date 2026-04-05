@@ -72,7 +72,7 @@ export const Messages = () => {
   }, [activeContact, token]);
 
   useEffect(() => {
-    const newSocket = io('/', {
+    const newSocket = io({
       auth: { token }
     });
 
