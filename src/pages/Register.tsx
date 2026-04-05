@@ -18,18 +18,25 @@ export const Register = () => {
 
     try {
       if (name && email && password) {
-        login({
-          id: '1',
-          name,
-          email,
-          role
-        }, 'mock-jwt-token-123');
-        navigate(`/${role}/dashboard`, { replace: true });
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, role }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          login(data.user, data.token);
+          navigate(`/${data.user.role}/dashboard`, { replace: true });
+        } else {
+          setError(data.error || 'Registration failed');
+        }
       } else {
         setError('Please fill in all fields');
       }
     } catch (err) {
-      setError('Registration failed');
+      setError('An error occurred. Please try again.');
     }
   };
 

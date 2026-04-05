@@ -1,26 +1,83 @@
-import React from 'react';
-import { Calendar, Users, FileText, CheckCircle, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Users, FileText, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
+
+interface Appointment {
+  _id: string;
+  patientId: { _id: string; name: string; email: string };
+  date: string;
+  status: string;
+  notes?: string;
+}
 
 export const DoctorDashboard = () => {
+  const { user, token } = useAuthStore();
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/appointments', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppointments(data.data);
+      } else {
+        setError('Failed to fetch appointments');
+      }
+    } catch (err) {
+      setError('An error occurred while fetching appointments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [token]);
+
+  const updateStatus = async (id: string, status: 'confirmed' | 'cancelled') => {
+    try {
+      const res = await fetch(`/api/appointments/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchAppointments();
+      } else {
+        alert(data.error || 'Failed to update status');
+      }
+    } catch (err) {
+      alert('An error occurred while updating status');
+    }
+  };
+
+  const pendingAppointments = appointments.filter(a => !a.status || a.status === 'upcoming' || a.status === 'pending');
+  const todayAppointments = appointments.filter(a => a.status === 'confirmed');
+
   const stats = [
-    { name: "Today's Appointments", value: '8', icon: Calendar, color: 'text-sky-500', bg: 'bg-sky-100' },
-    { name: 'Pending Requests', value: '3', icon: Clock, color: 'text-orange-500', bg: 'bg-orange-100' },
-    { name: 'Total Patients', value: '142', icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-100' },
+    { name: "Confirmed Appointments", value: todayAppointments.length.toString(), icon: Calendar, color: 'text-sky-500', bg: 'bg-sky-100' },
+    { name: 'Pending Requests', value: pendingAppointments.length.toString(), icon: Clock, color: 'text-orange-500', bg: 'bg-orange-100' },
+    { name: 'Total Patients', value: new Set(appointments.map(a => a.patientId?._id)).size.toString(), icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-100' },
   ];
 
-  const schedule = [
-    { id: 1, time: '09:00 AM', patient: 'Emma Thompson', type: 'Checkup', status: 'Completed' },
-    { id: 2, time: '10:30 AM', patient: 'James Wilson', type: 'Follow-up', status: 'In Progress' },
-    { id: 3, time: '11:15 AM', patient: 'Sarah Davis', type: 'Consultation', status: 'Waiting' },
-    { id: 4, time: '02:00 PM', patient: 'Michael Brown', type: 'New Patient', status: 'Upcoming' },
-  ];
+  if (loading) return <div className="flex justify-center py-10">Loading...</div>;
+  if (error) return <div className="text-red-500 py-10 text-center">{error}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Doctor Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-1">Welcome back, Dr. Smith. Here's your schedule for today.</p>
+          <p className="text-sm text-slate-500 mt-1">Welcome back, Dr. {user?.name}. Here's your schedule.</p>
         </div>
         <div className="flex items-center space-x-3">
           <button className="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium hover:bg-slate-50 transition-colors shadow-sm">
@@ -48,7 +105,7 @@ export const DoctorDashboard = () => {
         {/* Today's Schedule */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-slate-900">Today's Schedule</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Confirmed Appointments</h2>
             <div className="flex items-center space-x-2 text-sm text-slate-500">
               <Calendar className="h-4 w-4" />
               <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
@@ -56,32 +113,33 @@ export const DoctorDashboard = () => {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {schedule.map((apt) => (
-                <div key={apt.id} className="flex items-center p-4 rounded-xl border border-slate-100 hover:border-sky-100 hover:shadow-md hover:shadow-sky-100/50 transition-all bg-slate-50/50">
-                  <div className="w-24 text-sm font-semibold text-slate-700 border-r border-slate-200 mr-4">
-                    {apt.time}
+              {todayAppointments.length === 0 ? (
+                <p className="text-slate-500 text-center py-4">No confirmed appointments.</p>
+              ) : todayAppointments.map((apt) => (
+                <div key={apt._id} className="flex items-center p-4 rounded-xl border border-slate-100 hover:border-sky-100 hover:shadow-md hover:shadow-sky-100/50 transition-all bg-slate-50/50">
+                  <div className="w-32 text-sm font-semibold text-slate-700 border-r border-slate-200 mr-4">
+                    {new Date(apt.date).toLocaleString()}
                   </div>
                   <div className="flex-1 flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-3">
-                        {apt.patient.charAt(0)}
+                        {apt.patientId?.name?.charAt(0) || 'P'}
                       </div>
                       <div>
-                        <h3 className="text-sm font-semibold text-slate-900">{apt.patient}</h3>
-                        <p className="text-xs text-slate-500">{apt.type}</p>
+                        <h3 className="text-sm font-semibold text-slate-900">{apt.patientId?.name}</h3>
+                        <p className="text-xs text-slate-500">{apt.notes || 'No notes'}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <span className={`px-2.5 py-1 text-xs font-medium rounded-lg ${
-                        apt.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                        apt.status === 'In Progress' ? 'bg-sky-100 text-sky-700' :
-                        apt.status === 'Waiting' ? 'bg-orange-100 text-orange-700' :
-                        'bg-slate-100 text-slate-700'
-                      }`}>
+                      <span className="px-2.5 py-1 text-xs font-medium rounded-lg bg-green-100 text-green-700">
                         {apt.status}
                       </span>
-                      <button className="text-slate-400 hover:text-sky-500 transition-colors">
-                        <CheckCircle className="h-5 w-5" />
+                      <button 
+                        onClick={() => updateStatus(apt._id, 'cancelled')}
+                        className="text-slate-400 hover:text-red-500 transition-colors"
+                        title="Cancel"
+                      >
+                        <XCircle className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -96,22 +154,31 @@ export const DoctorDashboard = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
             <h3 className="text-lg font-semibold text-slate-900 mb-4">Pending Approvals</h3>
             <div className="space-y-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="flex flex-col p-4 rounded-xl border border-orange-100 bg-orange-50/50">
+              {pendingAppointments.length === 0 ? (
+                <p className="text-slate-500 text-sm">No pending requests.</p>
+              ) : pendingAppointments.map((apt) => (
+                <div key={apt._id} className="flex flex-col p-4 rounded-xl border border-orange-100 bg-orange-50/50">
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <h4 className="text-sm font-semibold text-slate-900">New Appointment</h4>
-                      <p className="text-xs text-slate-500">Requested by Jane Doe</p>
+                      <p className="text-xs text-slate-500">Requested by {apt.patientId?.name}</p>
+                      <p className="text-xs text-slate-500 mt-1">{new Date(apt.date).toLocaleString()}</p>
                     </div>
-                    <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded-md">
-                      Pending
+                    <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded-md capitalize">
+                      {apt.status || 'pending'}
                     </span>
                   </div>
                   <div className="flex space-x-2">
-                    <button className="flex-1 bg-white border border-slate-200 text-slate-700 py-1.5 text-xs font-medium rounded-lg hover:bg-slate-50 transition-colors">
+                    <button 
+                      onClick={() => updateStatus(apt._id, 'cancelled')}
+                      className="flex-1 bg-white border border-slate-200 text-slate-700 py-1.5 text-xs font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                    >
                       Decline
                     </button>
-                    <button className="flex-1 bg-sky-500 text-white py-1.5 text-xs font-medium rounded-lg hover:bg-sky-600 transition-colors shadow-sm shadow-sky-500/20">
+                    <button 
+                      onClick={() => updateStatus(apt._id, 'confirmed')}
+                      className="flex-1 bg-sky-500 text-white py-1.5 text-xs font-medium rounded-lg hover:bg-sky-600 transition-colors shadow-sm shadow-sky-500/20"
+                    >
                       Accept
                     </button>
                   </div>

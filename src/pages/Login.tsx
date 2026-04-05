@@ -18,21 +18,27 @@ export const Login = () => {
     e.preventDefault();
     setError('');
 
-    // Mock API call
     try {
       if (email && password) {
-        login({
-          id: '1',
-          name: 'Demo User',
-          email,
-          role
-        }, 'mock-jwt-token-123');
-        navigate(from, { replace: true });
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          login(data.user, data.token);
+          navigate(from, { replace: true });
+        } else {
+          setError(data.error || 'Invalid credentials');
+        }
       } else {
         setError('Please fill in all fields');
       }
     } catch (err) {
-      setError('Invalid credentials');
+      setError('An error occurred. Please try again.');
     }
   };
 
