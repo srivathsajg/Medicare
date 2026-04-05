@@ -4,6 +4,7 @@ import { Register } from './pages/Register';
 import { PatientDashboard } from './pages/PatientDashboard';
 import { DoctorDashboard } from './pages/DoctorDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AIAssistant } from './pages/AIAssistant';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -19,6 +20,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['patient']}>
               <PatientDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/patient/ai-assistant" 
+          element={
+            <ProtectedRoute allowedRoles={['patient']}>
+              <AIAssistant />
             </ProtectedRoute>
           } 
         />

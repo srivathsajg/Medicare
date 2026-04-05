@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, FileText, Activity, Clock, ChevronRight, Plus, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
 interface Appointment {
   _id: string;
@@ -23,6 +24,7 @@ interface Doctor {
 
 export const PatientDashboard = () => {
   const { token } = useAuthStore();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [records, setRecords] = useState<Record[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -222,7 +224,7 @@ export const PatientDashboard = () => {
             <p className="text-sky-100 text-sm mb-4">
               Get personalized health advice and diet recommendations based on your reports.
             </p>
-            <button className="w-full bg-white text-sky-600 py-2.5 rounded-xl font-medium hover:bg-sky-50 transition-colors">
+            <button onClick={() => navigate('/patient/ai-assistant')} className="w-full bg-white text-sky-600 py-2.5 rounded-xl font-medium hover:bg-sky-50 transition-colors">
               Chat Now
             </button>
           </div>
