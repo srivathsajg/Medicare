@@ -48,13 +48,16 @@ io.on('connection', (socket) => {
         text
       });
 
+      // Need to stringify/parse or convert to object to safely emit mongoose docs
+      const msgObj = message.toJSON();
+
       const receiverSocketId = connectedUsers.get(receiverId);
       if (receiverSocketId) {
-        io.to(receiverSocketId).emit('receiveMessage', message);
+        io.to(receiverSocketId).emit('receiveMessage', msgObj);
       }
       
       // Send back to sender for confirmation
-      socket.emit('messageSent', message);
+      socket.emit('messageSent', msgObj);
     } catch (err) {
       console.error('Socket message error:', err);
     }

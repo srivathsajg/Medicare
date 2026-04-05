@@ -72,16 +72,30 @@ export const Messages = () => {
   }, [activeContact, token]);
 
   useEffect(() => {
-    const newSocket = io({
-      auth: { token }
+    if (!token) return;
+
+    const newSocket = io('/', {
+      auth: { token },
+      transports: ['websocket', 'polling']
+    });
+
+    newSocket.on('connect', () => {
+      console.log('Socket connected');
     });
 
     newSocket.on('receiveMessage', (message: Chat) => {
-      setMessages(prev => [...prev, message]);
+      // Only append if it belongs to the current conversation
+      setMessages(prev => {
+        if (prev.some(m => m._id === message._id)) return prev;
+        return [...prev, message];
+      });
     });
 
     newSocket.on('messageSent', (message: Chat) => {
-      setMessages(prev => [...prev, message]);
+      setMessages(prev => {
+        if (prev.some(m => m._id === message._id)) return prev;
+        return [...prev, message];
+      });
     });
 
     setSocket(newSocket);
