@@ -4,6 +4,9 @@ import { Register } from './pages/Register';
 import { PatientDashboard } from './pages/PatientDashboard';
 import { DoctorDashboard } from './pages/DoctorDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { MedicalRecords } from './pages/MedicalRecords';
+import { Messages } from './pages/Messages';
+import { DietPlan } from './pages/DietPlan';
 import { AIAssistant } from './pages/AIAssistant';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -25,10 +28,42 @@ function App() {
         />
         
         <Route 
+          path="/patient/records" 
+          element={
+            <ProtectedRoute allowedRoles={['patient']}>
+              <MedicalRecords />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/patient/messages" 
+          element={
+            <ProtectedRoute allowedRoles={['patient']}>
+              <Messages />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/patient/diet" 
+          element={
+            <ProtectedRoute allowedRoles={['patient']}>
+              <DietPlan />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/patient/ai-assistant" 
           element={
             <ProtectedRoute allowedRoles={['patient']}>
               <AIAssistant />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/doctor/messages" 
+          element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <Messages />
             </ProtectedRoute>
           } 
         />

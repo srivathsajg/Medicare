@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, FileText, Activity, Clock, ChevronRight, Plus, X } from 'lucide-react';
+import { Calendar, FileText, Activity, Clock, ChevronRight, Plus, X, AlertOctagon, Utensils } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,6 +25,7 @@ interface Doctor {
 export const PatientDashboard = () => {
   const { token } = useAuthStore();
   const navigate = useNavigate();
+
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [records, setRecords] = useState<Record[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -224,8 +225,26 @@ export const PatientDashboard = () => {
             <p className="text-sky-100 text-sm mb-4">
               Get personalized health advice and diet recommendations based on your reports.
             </p>
-            <button onClick={() => navigate('/patient/ai-assistant')} className="w-full bg-white text-sky-600 py-2.5 rounded-xl font-medium hover:bg-sky-50 transition-colors">
+            <button 
+              onClick={() => navigate('/patient/ai-assistant')}
+              className="w-full bg-white text-sky-600 py-2.5 rounded-xl font-medium hover:bg-sky-50 transition-colors"
+            >
               Chat Now
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <button onClick={() => navigate('/patient/diet')} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 hover:bg-slate-50 transition flex flex-col items-center justify-center text-center">
+              <div className="h-10 w-10 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mb-2">
+                <Utensils className="h-5 w-5" />
+              </div>
+              <span className="text-sm font-medium text-slate-800">Diet Plan</span>
+            </button>
+            <button onClick={() => alert('Emergency SOS Activated!')} className="bg-red-50 rounded-2xl shadow-sm border border-red-100 p-4 hover:bg-red-100 transition flex flex-col items-center justify-center text-center">
+              <div className="h-10 w-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-2">
+                <AlertOctagon className="h-5 w-5" />
+              </div>
+              <span className="text-sm font-medium text-red-700">Emergency</span>
             </button>
           </div>
 

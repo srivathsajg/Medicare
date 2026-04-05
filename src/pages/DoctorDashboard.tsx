@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, FileText, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Calendar, Users, FileText, CheckCircle, Clock, XCircle, MessageSquare } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
 interface Appointment {
   _id: string;
@@ -12,6 +13,7 @@ interface Appointment {
 
 export const DoctorDashboard = () => {
   const { user, token } = useAuthStore();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -80,8 +82,9 @@ export const DoctorDashboard = () => {
           <p className="text-sm text-slate-500 mt-1">Welcome back, Dr. {user?.name}. Here's your schedule.</p>
         </div>
         <div className="flex items-center space-x-3">
-          <button className="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium hover:bg-slate-50 transition-colors shadow-sm">
-            Manage Schedule
+          <button onClick={() => navigate('/doctor/messages')} className="bg-sky-50 text-sky-600 px-4 py-2 rounded-xl font-medium hover:bg-sky-100 transition-colors shadow-sm flex items-center">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Messages
           </button>
         </div>
       </div>
