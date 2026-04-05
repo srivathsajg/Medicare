@@ -43,15 +43,20 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-50 via-white to-indigo-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Decorative blobs */}
+      <div className="absolute top-0 left-0 w-72 h-72 bg-sky-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+      <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex justify-center">
-          <div className="h-16 w-16 bg-sky-500 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/30">
-            <Activity className="h-10 w-10 text-white" />
+          <div className="h-16 w-16 bg-gradient-to-br from-sky-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/30 border border-white/50">
+            <Activity className="h-10 w-10 text-white drop-shadow-sm" />
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-slate-900">
-          Sign in to MediCare+
+          Sign in to <span className="bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-indigo-600">MediCare+</span>
         </h2>
         <p className="mt-2 text-center text-sm text-slate-600">
           Or{' '}
@@ -61,8 +66,8 @@ export const Login = () => {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl shadow-slate-200/50 sm:rounded-2xl sm:px-10 border border-slate-100">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="bg-white/60 backdrop-blur-xl py-8 px-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-2xl sm:px-10 border border-white/50">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label className="block text-sm font-medium text-slate-700">Select Role</label>
@@ -73,10 +78,10 @@ export const Login = () => {
                     type="button"
                     onClick={() => setRole(r as any)}
                     className={`
-                      px-3 py-2 text-sm font-medium rounded-xl border transition-all duration-200 capitalize
+                      px-3 py-2 text-sm font-medium rounded-xl border transition-all duration-200 capitalize backdrop-blur-sm
                       ${role === r 
-                        ? 'bg-sky-50 border-sky-500 text-sky-700 ring-1 ring-sky-500' 
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}
+                        ? 'bg-sky-500 text-white shadow-md shadow-sky-500/30 border-transparent' 
+                        : 'bg-white/50 border-white/60 text-slate-700 hover:bg-white/80'}
                     `}
                   >
                     {r}
@@ -101,7 +106,7 @@ export const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-xl focus:ring-sky-500 focus:border-sky-500 sm:text-sm transition-colors"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-white/60 bg-white/50 rounded-xl focus:ring-sky-500 focus:border-sky-500 sm:text-sm transition-all focus:bg-white backdrop-blur-sm"
                   placeholder="you@example.com"
                 />
               </div>
@@ -123,14 +128,14 @@ export const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-xl focus:ring-sky-500 focus:border-sky-500 sm:text-sm transition-colors"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-white/60 bg-white/50 rounded-xl focus:ring-sky-500 focus:border-sky-500 sm:text-sm transition-all focus:bg-white backdrop-blur-sm"
                   placeholder="••••••••"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
+              <div className="text-sm text-red-600 bg-red-50/80 backdrop-blur-sm p-3 rounded-xl border border-red-100/50">
                 {error}
               </div>
             )}
@@ -141,7 +146,7 @@ export const Login = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-sky-600 focus:ring-sky-500 border-slate-300 rounded"
+                  className="h-4 w-4 text-sky-600 focus:ring-sky-500 border-slate-300 rounded bg-white/50"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-900">
                   Remember me
@@ -158,7 +163,7 @@ export const Login = () => {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors"
+                className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-xl shadow-lg shadow-sky-500/30 text-sm font-bold text-white bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all transform hover:-translate-y-0.5"
               >
                 Sign in
                 <ArrowRight className="ml-2 h-4 w-4" />

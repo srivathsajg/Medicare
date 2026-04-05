@@ -162,9 +162,9 @@ export const PatientDashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat) => (
-          <div key={stat.name} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center">
-            <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${stat.bg} mr-4`}>
-              <stat.icon className={`h-6 w-6 ${stat.color}`} />
+          <div key={stat.name} className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 shadow-sm border border-white/50 flex items-center hover:bg-white/80 transition-colors">
+            <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${stat.bg} mr-4 border border-white/50 shadow-inner`}>
+              <stat.icon className={`h-6 w-6 ${stat.color} drop-shadow-sm`} />
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">{stat.name}</p>
@@ -176,36 +176,36 @@ export const PatientDashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Appointments List */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+        <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-white/50 flex justify-between items-center bg-white/40">
             <h2 className="text-lg font-semibold text-slate-900">Upcoming Appointments</h2>
-            <button className="text-sm text-sky-500 font-medium hover:text-sky-600 flex items-center">
+            <button className="text-sm text-sky-600 font-medium hover:text-sky-700 flex items-center">
               View All <ChevronRight className="h-4 w-4 ml-1" />
             </button>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-6 space-y-4 flex-1">
             {appointments.length === 0 ? (
               <p className="text-slate-500 text-center py-4">No appointments found.</p>
             ) : appointments.map((apt) => (
-              <div key={apt._id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-sky-100 hover:shadow-md hover:shadow-sky-100/50 transition-all bg-slate-50/50">
+              <div key={apt._id} className="flex items-center justify-between p-4 rounded-xl border border-white/60 hover:border-sky-200 hover:shadow-md transition-all bg-white/50 backdrop-blur-sm group">
                 <div className="flex items-center">
-                  <div className="h-12 w-12 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 font-bold mr-4">
+                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-sky-100 to-indigo-100 border border-white flex items-center justify-center text-sky-600 font-bold mr-4 shadow-sm group-hover:scale-105 transition-transform">
                     {apt.doctorId?.name?.charAt(0) || 'D'}
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-slate-900">Dr. {apt.doctorId?.name}</h3>
-                    <p className="text-xs text-slate-500">{apt.doctorId?.specialization}</p>
+                    <h3 className="text-sm font-bold text-slate-900">Dr. {apt.doctorId?.name}</h3>
+                    <p className="text-xs text-slate-500 font-medium">{apt.doctorId?.specialization}</p>
                   </div>
                 </div>
                 <div className="text-right flex flex-col items-end">
-                  <div className="flex items-center text-sm text-slate-700 font-medium mb-1">
-                    <Clock className="h-4 w-4 mr-1 text-slate-400" />
+                  <div className="flex items-center text-sm text-slate-700 font-semibold mb-1.5">
+                    <Clock className="h-4 w-4 mr-1.5 text-sky-500" />
                     {new Date(apt.date).toLocaleString()}
                   </div>
-                  <span className={`px-2.5 py-1 text-xs font-medium rounded-lg capitalize ${
-                    apt.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                    apt.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                    'bg-sky-100 text-sky-700'
+                  <span className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-lg ${
+                    apt.status === 'confirmed' ? 'bg-green-100 text-green-700 border border-green-200' :
+                    apt.status === 'cancelled' ? 'bg-red-100 text-red-700 border border-red-200' :
+                    'bg-sky-100 text-sky-700 border border-sky-200'
                   }`}>
                     {apt.status || 'upcoming'}
                   </span>
@@ -217,52 +217,54 @@ export const PatientDashboard = () => {
 
         {/* Quick Actions & AI */}
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-sky-500 to-indigo-600 rounded-2xl p-6 text-white shadow-lg shadow-sky-500/30">
-            <div className="h-12 w-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm mb-4">
-              <Activity className="h-6 w-6 text-white" />
+          <div className="bg-gradient-to-br from-sky-500 to-indigo-600 rounded-2xl p-6 text-white shadow-xl shadow-sky-500/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+            <div className="h-12 w-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md mb-4 border border-white/30 shadow-inner relative z-10">
+              <Activity className="h-6 w-6 text-white drop-shadow-sm" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">AI Health Assistant</h3>
-            <p className="text-sky-100 text-sm mb-4">
+            <h3 className="text-lg font-bold mb-2 relative z-10">AI Health Assistant</h3>
+            <p className="text-sky-50 text-sm mb-5 relative z-10 leading-relaxed">
               Get personalized health advice and diet recommendations based on your reports.
             </p>
             <button 
               onClick={() => navigate('/patient/ai-assistant')}
-              className="w-full bg-white text-sky-600 py-2.5 rounded-xl font-medium hover:bg-sky-50 transition-colors"
+              className="w-full bg-white/90 backdrop-blur-sm text-sky-600 py-3 rounded-xl font-bold hover:bg-white transition-colors shadow-sm relative z-10"
             >
               Chat Now
             </button>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <button onClick={() => navigate('/patient/diet')} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 hover:bg-slate-50 transition flex flex-col items-center justify-center text-center">
-              <div className="h-10 w-10 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mb-2">
+            <button onClick={() => navigate('/patient/diet')} className="bg-white/60 backdrop-blur-xl shadow-sm border border-white/50 p-4 hover:bg-white/80 transition-all flex flex-col items-center justify-center text-center rounded-2xl group">
+              <div className="h-12 w-12 bg-gradient-to-br from-orange-100 to-amber-100 text-orange-500 rounded-full flex items-center justify-center mb-3 shadow-inner border border-white group-hover:scale-110 transition-transform">
                 <Utensils className="h-5 w-5" />
               </div>
-              <span className="text-sm font-medium text-slate-800">Diet Plan</span>
+              <span className="text-sm font-bold text-slate-800">Diet Plan</span>
             </button>
-            <button onClick={() => alert('Emergency SOS Activated!')} className="bg-red-50 rounded-2xl shadow-sm border border-red-100 p-4 hover:bg-red-100 transition flex flex-col items-center justify-center text-center">
-              <div className="h-10 w-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-2">
-                <AlertOctagon className="h-5 w-5" />
+            <button onClick={() => alert('Emergency SOS Activated!')} className="bg-gradient-to-br from-red-50 to-rose-50 rounded-2xl shadow-sm border border-red-100/50 p-4 hover:from-red-100 hover:to-rose-100 transition-all flex flex-col items-center justify-center text-center group relative overflow-hidden">
+              <div className="absolute inset-0 bg-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse"></div>
+              <div className="h-12 w-12 bg-gradient-to-br from-red-100 to-rose-100 text-red-600 rounded-full flex items-center justify-center mb-3 shadow-inner border border-white relative z-10 group-hover:scale-110 transition-transform">
+                <AlertOctagon className="h-5 w-5 drop-shadow-sm" />
               </div>
-              <span className="text-sm font-medium text-red-700">Emergency</span>
+              <span className="text-sm font-bold text-red-700 relative z-10">Emergency</span>
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Reports</h3>
+          <div className="bg-white/60 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 p-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Recent Reports</h3>
             <div className="space-y-3">
               {records.length === 0 ? (
-                <p className="text-slate-500 text-sm text-center">No reports found.</p>
+                <p className="text-slate-500 text-sm text-center py-2">No reports found.</p>
               ) : records.slice(0, 3).map((record) => (
-                <div key={record._id} className="flex items-center p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer border border-transparent hover:border-slate-100">
-                  <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center mr-3">
+                <div key={record._id} className="flex items-center p-3 rounded-xl bg-white/40 hover:bg-white/80 transition-colors cursor-pointer border border-white/60 shadow-sm group">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center mr-3 border border-white shadow-inner group-hover:scale-105 transition-transform">
                     <FileText className="h-5 w-5 text-green-600" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">{record.title}</p>
-                    <p className="text-xs text-slate-500">{new Date(record.createdAt || Date.now()).toLocaleDateString()}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">{record.title}</p>
+                    <p className="text-xs text-slate-500 font-medium">{new Date(record.createdAt || Date.now()).toLocaleDateString()}</p>
                   </div>
-                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                  <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
                 </div>
               ))}
             </div>
