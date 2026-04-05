@@ -6,6 +6,7 @@ interface Record {
   _id: string;
   title: string;
   description: string;
+  fileUrl?: string;
   createdAt: string;
   verified: boolean;
 }
@@ -16,6 +17,7 @@ export const MedicalRecords = () => {
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
   const [formData, setFormData] = useState({ title: '', description: '' });
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
 
   const fetchRecords = async () => {
     try {
@@ -37,6 +39,17 @@ export const MedicalRecords = () => {
     fetchRecords();
   }, [token]);
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageBase64(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -49,6 +62,7 @@ export const MedicalRecords = () => {
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
+          fileUrl: imageBase64,
           verified: true // mocking blockchain verification
         })
       });
@@ -56,6 +70,7 @@ export const MedicalRecords = () => {
       if (data.success) {
         setShowUpload(false);
         setFormData({ title: '', description: '' });
+        setImageBase64(null);
         fetchRecords();
       }
     } catch (err) {
@@ -107,7 +122,16 @@ export const MedicalRecords = () => {
                 className="w-full rounded-xl border border-slate-200 px-4 py-2 bg-white/50 focus:ring-sky-500 focus:border-sky-500"
               />
             </div>
-            <div className="flex space-x-3">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Image / File</label>
+              <input 
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full rounded-xl border border-slate-200 px-4 py-1.5 bg-white/50 focus:ring-sky-500 focus:border-sky-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100"
+              />
+            </div>
+            <div className="flex space-x-3 md:col-span-3 mt-2">
               <button type="submit" className="bg-sky-500 text-white px-6 py-2 rounded-xl hover:bg-sky-600 transition-colors shadow-sm">
                 Save
               </button>
@@ -116,6 +140,12 @@ export const MedicalRecords = () => {
               </button>
             </div>
           </form>
+          {imageBase64 && (
+            <div className="mt-4">
+              <p className="text-sm font-medium text-slate-700 mb-2">Preview:</p>
+              <img src={imageBase64} alt="Preview" className="h-32 rounded-lg object-cover border border-slate-200 shadow-sm" />
+            </div>
+          )}
         </div>
       )}
 
@@ -126,7 +156,7 @@ export const MedicalRecords = () => {
           </div>
         )}
         {records.map(record => (
-          <div key={record._id} className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-white/50 hover:shadow-md transition-all group">
+          <div key={record._id} className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-white/50 hover:shadow-md transition-all group flex flex-col">
             <div className="flex justify-between items-start mb-4">
               <div className="h-12 w-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center">
                 <FileText className="h-6 w-6" />
@@ -140,6 +170,11 @@ export const MedicalRecords = () => {
             </div>
             <h3 className="font-semibold text-slate-900 text-lg mb-1">{record.title}</h3>
             <p className="text-sm text-slate-500 mb-4 line-clamp-2">{record.description}</p>
+            {record.fileUrl && (
+              <div className="mb-4 flex-1">
+                <img src={record.fileUrl} alt="Record Preview" className="w-full h-32 object-cover rounded-xl border border-slate-100 shadow-sm" />
+              </div>
+            )}
             <div className="flex items-center justify-between mt-auto border-t border-slate-100 pt-4">
               <span className="text-xs text-slate-400">
                 {new Date(record.createdAt).toLocaleDateString()}
