@@ -42,7 +42,7 @@ export const Messages = () => {
         const data = await res.json();
         if (data.success) {
           setContacts(data.data);
-          if (data.data.length > 0) {
+          if (data.data.length > 0 && !activeContact) {
             setActiveContact(data.data[0]);
           }
         }
@@ -51,10 +51,14 @@ export const Messages = () => {
       }
     };
     fetchContacts();
-  }, [token]);
+  }, [token]); // removed activeContact from dependencies for initial load
 
   useEffect(() => {
     if (!activeContact) return;
+    
+    // Clear messages when switching contacts before fetching new ones
+    setMessages([]);
+    
     const fetchMessages = async () => {
       try {
         const res = await fetch(`/api/messages/${activeContact._id}`, {
@@ -83,27 +87,45 @@ export const Messages = () => {
       console.log('Socket connected');
     });
 
-    newSocket.on('receiveMessage', (message: Chat) => {
-      // Only append if it belongs to the current conversation
-      setMessages(prev => {
-        if (prev.some(m => m._id === message._id)) return prev;
-        return [...prev, message];
-      });
-    });
-
-    newSocket.on('messageSent', (message: Chat) => {
-      setMessages(prev => {
-        if (prev.some(m => m._id === message._id)) return prev;
-        return [...prev, message];
-      });
-    });
-
+    // We store socket in ref so event listeners always have latest state 
+    // without needing to re-bind the listener
     setSocket(newSocket);
 
     return () => {
       newSocket.disconnect();
     };
   }, [token]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleReceive = (message: Chat) => {
+      setMessages(prev => {
+        if (prev.some(m => m._id === message._id)) return prev;
+        
+        // Only show if it belongs to the CURRENTLY selected contact
+        if (activeContact && (message.senderId === activeContact._id || message.receiverId === activeContact._id)) {
+           return [...prev, message];
+        }
+        return prev;
+      });
+    };
+
+    const handleSent = (message: Chat) => {
+      setMessages(prev => {
+        if (prev.some(m => m._id === message._id)) return prev;
+        return [...prev, message];
+      });
+    };
+
+    socket.on('receiveMessage', handleReceive);
+    socket.on('messageSent', handleSent);
+
+    return () => {
+      socket.off('receiveMessage', handleReceive);
+      socket.off('messageSent', handleSent);
+    };
+  }, [socket, activeContact]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
