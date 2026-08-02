@@ -1,0 +1,93 @@
+/* Custom Calendar Override */
+.rbc-calendar {
+    font-family: 'Inter', sans-serif;
+    color: #cbd5e1;
+}
+
+.rbc-header {
+    padding: 12px 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.rbc-month-view {
+    border: none !important;
+    background: transparent;
+}
+
+.rbc-day-bg {
+    background: transparent;
+    border-left: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+.rbc-month-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    overflow: visible !important; /* Allow hover effects to pop out */
+}
+
+.rbc-date-cell {
+    padding: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #64748b;
+    text-align: center;
+}
+
+.rbc-off-range-bg {
+    background: rgba(255, 255, 255, 0.01) !important;
+}
+
+.rbc-today {
+    background: transparent !important;
+}
+
+.rbc-now-indicator {
+    background-color: #00FFB2;
+}
+
+.rbc-event {
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+}
+
+.rbc-event:focus {
+    outline: none;
+}
+
+/* Custom Today Cell Highlight */
+.custom-today-cell {
+    position: relative;
+}
+.custom-today-cell::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #00FFB2 0%, #00cc8e 100%);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0.15;
+}
+.custom-today-text {
+    color: #00FFB2 !important;
+    font-weight: 700 !important;
+}
+
+/* Hide Default Toolbar */
+.rbc-toolbar {
+    display: none !important;
+}
+
+/* Cell Hover Effect */
+.rbc-day-bg:hover {
+    background: rgba(255, 255, 255, 0.02) !important;
+    transition: background 0.2s ease;
+}

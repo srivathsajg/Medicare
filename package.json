@@ -1,0 +1,11 @@
+{
+  "name": "healthcare-system-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix backend run dev",
+    "start": "npm --prefix backend start"
+  },
+  "dependencies": {
+    "@pinata/sdk": "^2.1.0"
+  }
+}

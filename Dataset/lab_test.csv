@@ -1,0 +1,201 @@
+test_id,test_name,price
+1,Complete Blood Count (CBC),250
+2,Blood Sugar Fasting,120
+3,Blood Sugar Postprandial,120
+4,Urine Routine Test,150
+5,Lipid Profile,500
+6,Liver Function Test (LFT),600
+7,Kidney Function Test (KFT),550
+8,Thyroid Stimulating Hormone (TSH),300
+9,Triiodothyronine (T3),250
+10,Thyroxine (T4),250
+11,Hemoglobin Test,100
+12,Vitamin D Test,900
+13,Vitamin B12 Test,700
+14,Malaria Parasite Test,200
+15,Dengue NS1 Antigen Test,600
+16,ESR Test,150
+17,C-Reactive Protein (CRP),400
+18,HbA1c Test,450
+19,Prothrombin Time (PT),350
+20,INR Test,300
+21,Blood Grouping and Rh Typing,200
+22,Serum Calcium,250
+23,Serum Uric Acid,200
+24,Serum Creatinine,180
+25,Blood Urea Nitrogen (BUN),180
+26,Electrolytes Panel,400
+27,Sodium Test,150
+28,Potassium Test,150
+29,Chloride Test,150
+30,Serum Iron,300
+31,Total Iron Binding Capacity (TIBC),350
+32,Ferritin Test,500
+33,Amylase Test,300
+34,Lipase Test,350
+35,Alkaline Phosphatase (ALP),250
+36,Bilirubin Total,200
+37,Bilirubin Direct,200
+38,Bilirubin Indirect,200
+39,Albumin Test,250
+40,Globulin Test,250
+41,Total Protein Test,300
+42,SGOT (AST),250
+43,SGPT (ALT),250
+44,Gamma GT (GGT),300
+45,LDH Test,350
+46,CPK Test,350
+47,CK-MB Test,400
+48,Troponin I Test,800
+49,Troponin T Test,800
+50,D-Dimer Test,900
+51,Procalcitonin Test,1200
+52,Interleukin-6 (IL-6),1500
+53,RA Factor Test,400
+54,Anti-CCP Test,900
+55,ANA Test,1000
+56,Anti-dsDNA Test,1200
+57,HIV Test,300
+58,Hepatitis B Surface Antigen (HBsAg),350
+59,Hepatitis C Antibody (HCV),400
+60,VDRL Test,250
+61,Widal Test,300
+62,Typhoid IgM Test,400
+63,Urine Culture,500
+64,Blood Culture,800
+65,Sputum Culture,600
+66,Stool Routine Test,200
+67,Stool Culture,500
+68,Occult Blood Test,250
+69,Pregnancy Test (Beta HCG),350
+70,FSH Test,400
+71,LH Test,400
+72,Prolactin Test,450
+73,Testosterone Test,500
+74,Estrogen Test,500
+75,Progesterone Test,450
+76,PSA Test,600
+77,CA-125 Test,800
+78,CA 19-9 Test,900
+79,CEA Test,700
+80,AFP Test,700
+81,Allergy Panel Test,1500
+82,IgE Test,600
+83,IgG Test,500
+84,IgM Test,500
+85,IgA Test,500
+86,Cortisol Test,600
+87,Insulin Test,500
+88,C-Peptide Test,600
+89,Glucose Tolerance Test (GTT),400
+90,Reticulocyte Count,250
+91,Peripheral Smear Examination,300
+92,Bone Marrow Test,2000
+93,Coombs Test Direct,500
+94,Coombs Test Indirect,500
+95,Homocysteine Test,900
+96,Lactate Test,400
+97,Arterial Blood Gas (ABG),800
+98,Thyroid Profile (T3 T4 TSH),600
+99,Full Body Checkup Package,2500
+100,Cardiac Risk Profile,1800
+101,Advanced Lipid Profile,800
+102,High Sensitivity CRP,700
+103,Serum Magnesium,250
+104,Serum Phosphorus,250
+105,Anti-TPO Antibody,900
+106,Anti-TG Antibody,850
+107,Thyroglobulin Test,800
+108,Free T3 Test,350
+109,Free T4 Test,350
+110,Free PSA Test,700
+111,Vitamin K Test,1000
+112,Folate Test,600
+113,Zinc Test,700
+114,Copper Test,700
+115,Lead Test,800
+116,Heavy Metal Panel,2000
+117,Drug Screening Test,1200
+118,Alcohol Test,400
+119,Urine Microalbumin,300
+120,Microalbumin Creatinine Ratio,500
+121,Serum Osmolality,400
+122,Urine Osmolality,400
+123,Creatine Kinase Total,350
+124,Myoglobin Test,600
+125,Beta-2 Microglobulin,900
+126,NT-proBNP Test,1500
+127,Anti-Streptolysin O (ASO),400
+128,Rubella IgG,500
+129,Rubella IgM,500
+130,Toxoplasma IgG,600
+131,Toxoplasma IgM,600
+132,CMV IgG,600
+133,CMV IgM,600
+134,Varicella IgG,600
+135,Varicella IgM,600
+136,H1N1 Test,1200
+137,Influenza Panel,1000
+138,Chikungunya Test,600
+139,Zika Virus Test,1500
+140,TB Gold Test,2000
+141,Sputum AFB Test,300
+142,Mantoux Test,200
+143,ANA Profile,1500
+144,Autoimmune Panel,2000
+145,C3 Complement Test,600
+146,C4 Complement Test,600
+147,Serum Ammonia,500
+148,Plasma Renin Activity,1200
+149,Aldosterone Test,1200
+150,Advanced Liver Panel,1200
+151,Advanced Kidney Panel,1100
+152,Electrolyte Extended Panel,700
+153,Cardiac Enzyme Panel,1500
+154,Coagulation Profile,900
+155,Bleeding Time Test,200
+156,Clotting Time Test,200
+157,Fibrinogen Test,500
+158,Thrombin Time,500
+159,Platelet Count,150
+160,WBC Count,150
+161,RBC Count,150
+162,Hematocrit Test,150
+163,MCV Test,150
+164,MCH Test,150
+165,MCHC Test,150
+166,RDW Test,150
+167,Absolute Neutrophil Count,200
+168,Absolute Lymphocyte Count,200
+169,Absolute Eosinophil Count,200
+170,Absolute Basophil Count,200
+171,Peripheral Blood Film,300
+172,Serum Lipase Extended,400
+173,Pancreatic Panel,1200
+174,Helicobacter Pylori Test,700
+175,Gastrin Test,800
+176,Pepsinogen Test,900
+177,Food Allergy Panel,2000
+178,Respiratory Allergy Panel,1800
+179,Autoimmune Thyroid Panel,1500
+180,Metabolic Panel Basic,900
+181,Metabolic Panel Comprehensive,1500
+182,Diabetes Panel Basic,800
+183,Diabetes Panel Advanced,1500
+184,Cardiac Screening Basic,1200
+185,Cardiac Screening Advanced,2500
+186,Cancer Screening Basic,2000
+187,Cancer Screening Advanced,4000
+188,Fertility Panel Male,1800
+189,Fertility Panel Female,2000
+190,Pre-Surgery Panel,2500
+191,Post-Surgery Panel,2000
+192,Senior Citizen Health Package,3000
+193,Women Health Package,2800
+194,Men Health Package,2700
+195,Executive Health Package,5000
+196,Child Health Package,2000
+197,Immunity Panel,1800
+198,Vitamin Panel Comprehensive,2500
+199,Hormone Panel Comprehensive,3000
+200,Comprehensive Health Checkup Package,3500

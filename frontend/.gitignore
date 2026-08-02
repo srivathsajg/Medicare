@@ -1,0 +1,60 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ==============================
+# Medicare Project
+# ==============================
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Hardhat generated files
+artifacts/
+cache/
+**/artifacts/
+**/cache/
+
+# Coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/

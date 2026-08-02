@@ -1,0 +1,79 @@
+# ============================================
+# MEDICARE PROJECT - GITIGNORE
+# ============================================
+
+# Environment variables / Secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Node.js
+node_modules/
+**/node_modules/
+
+# Build files
+dist/
+**/dist/
+build/
+**/build/
+dist-ssr/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+venv/
+.venv/
+**/venv/
+**/.venv/
+
+# Python ML cache
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Hardhat generated files
+artifacts/
+cache/
+**/artifacts/
+**/cache/
+
+# Coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Large datasets / trained ML models
+Dataset/Drug Labels Dataset.csv
+ai_diet_model/diet_ml_model.pkl
+# Large trained ML models
+*.pkl
+**/*.pkl
+
+# Large dataset
+Dataset/Drug Labels Dataset.csv
