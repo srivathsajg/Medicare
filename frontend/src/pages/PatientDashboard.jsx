@@ -11,7 +11,7 @@ import {
     CalendarClock, FileText, ClipboardList, Settings,
     User, LogOut, X, CreditCard, Microscope, Utensils,
     Navigation, MapPin, Truck, Package, Clock, Loader2,
-    AlertCircle, Building2, ChevronRight
+    AlertCircle, Building2, ChevronRight, AlertTriangle, ListChecks
 } from 'lucide-react';
 import UniversalSearchBar from '../components/ui/UniversalSearchBar';
 import AIAssistant from '../components/ui/AIAssistant';
@@ -72,12 +72,20 @@ const PatientDashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Handle emergency trigger from navbar
+    // Handle emergency trigger from navbar / navigation state
     useEffect(() => {
         if (location.state?.openEmergency) {
             handleOpenEmergencyModal();
             // Clear state after opening
             window.history.replaceState({}, document.title);
+        }
+        if (location.state?.toast) {
+            showToast(location.state.toast);
+            // Clear toast state without losing scroll position etc.
+            window.history.replaceState(
+                { ...window.history.state, usr: {} },
+                document.title
+            );
         }
     }, [location.state]);
 
@@ -279,6 +287,10 @@ const PatientDashboard = () => {
                     <p className="text-xs font-bold text-gray-700 uppercase tracking-widest px-3 mb-2">Menu</p>
                     <SidebarLink to="/patient-dashboard" end icon={LayoutGrid} label="Dashboard" />
                     <SidebarLink to="/patient-dashboard/appointments" icon={CalendarClock} label="Appointments" />
+                    <div className="my-3 px-3 border-t border-white/[0.04]" />
+                    <SidebarLink to="/patient-dashboard/emergency" icon={AlertTriangle} label="Emergency Booking" />
+                    <SidebarLink to="/patient-dashboard/emergencies" icon={ListChecks} label="My Emergencies" />
+                    <div className="my-3 px-3 border-t border-white/[0.04]" />
                     <SidebarLink to="/patient-dashboard/records" icon={FileText} label="My Records" />
                     <SidebarLink to="/patient-dashboard/insurance" icon={Shield} label="Insurance" />
                     <SidebarLink to="/patient-dashboard/prescriptions" icon={ClipboardList} label="Prescriptions" />

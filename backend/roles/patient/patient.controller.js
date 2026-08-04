@@ -6,6 +6,12 @@ const Appointment = require("../../modules/appointments/models/appointment.model
 const DoctorAvailability = require("../../modules/appointments/models/availability.model");
 const Bill = require("../../modules/billing/models/bill.model");
 const LabOrder = require("../../modules/lab/models/labOrder.model");
+const EmergencyCase = require("../../modules/emergency/models/emergencyCase.model");
+const {
+  INCIDENT_TYPES,
+  SEVERITY_LEVELS,
+} = require("../../modules/emergency/service");
+const { logAction } = require("../../modules/audit/service");
 const mongoose = require("mongoose");
 const socket = require("../../core/socket");
 
@@ -644,6 +650,57 @@ const bookAppointment = async (req, res) => {
         });
 
         await appointment.save({ session });
+
+        let emergencyCase = null;
+        if (isEmergency) {
+            const dupCheck = await EmergencyCase.findOne({
+                linkedAppointmentId: appointment._id,
+            }).session(session);
+
+            if (!dupCheck) {
+                const requestIncidentType = req.body.incidentType;
+                const requestSeverity = req.body.severity;
+
+                const normalizedIncidentType = INCIDENT_TYPES.includes(requestIncidentType)
+                    ? requestIncidentType
+                    : "MEDICAL_EMERGENCY";
+
+                let normalizedSeverity = SEVERITY_LEVELS.includes(requestSeverity)
+                    ? requestSeverity
+                    : null;
+
+                if (!normalizedSeverity) {
+                    const erUp = (emergencyReason || reason || "").toLowerCase();
+                    if (/cardiac|chest.?pain|heart|stroke|seizure|unconscious|breathing|bleeding|accident/.test(erUp)) {
+                        normalizedSeverity = "CRITICAL";
+                    } else if (/fall|fever|pain|severe|urgent|allergy/.test(erUp)) {
+                        normalizedSeverity = "HIGH";
+                    } else if (/mild|minor|headache|nausea/.test(erUp)) {
+                        normalizedSeverity = "MODERATE";
+                    } else {
+                        normalizedSeverity = "HIGH";
+                    }
+                }
+
+                emergencyCase = new EmergencyCase({
+                    patient: new mongoose.Types.ObjectId(patientId),
+                    reportedBy: new mongoose.Types.ObjectId(patientId),
+                    incidentType: normalizedIncidentType,
+                    description: isEmergency ? (emergencyReason || reason || "") : (reason || ""),
+                    severity: normalizedSeverity,
+                    location: {},
+                    assignedHospital: doctorExists.hospitalName || undefined,
+                    assignedDoctor: new mongoose.Types.ObjectId(doctorId),
+                    linkedAppointmentId: appointment._id,
+                    status: "REPORTED",
+                    statusTimestamps: new Map([["REPORTED", new Date()]]),
+                });
+
+                await emergencyCase.save({ session });
+            } else {
+                emergencyCase = dupCheck;
+            }
+        }
         
         // Emit socket event for real-time updates
         const io = socket.getIO();
@@ -672,7 +729,77 @@ const bookAppointment = async (req, res) => {
 
         console.log("[bookAppointment] Appointment saved:", appointment._id);
 
-        res.status(201).json({ success: true, data: appointment });
+        let emergencyCasePayload = null;
+        if (isEmergency && emergencyCase) {
+            try {
+                const ipAddress = (
+                    req.ip ||
+                    (req.headers && req.headers["x-forwarded-for"]) ||
+                    (req.connection && req.connection.remoteAddress) ||
+                    "127.0.0.1"
+                );
+
+                const populatedEmergency = await EmergencyCase.findById(emergencyCase._id)
+                    .populate("patient", "name email phone bloodGroup healthSummary")
+                    .populate("reportedBy", "name role email")
+                    .populate("assignedDoctor", "name specialization hospitalName")
+                    .lean();
+
+                emergencyCasePayload = populatedEmergency;
+
+                await logAction({
+                    userId: new mongoose.Types.ObjectId(patientId),
+                    role: req.user.role,
+                    action: "EMERGENCY_CASE_CREATED",
+                    module: "EMERGENCY",
+                    targetId: String(emergencyCase._id),
+                    ipAddress,
+                    details: {
+                        source: "emergencyBooking",
+                        linkedAppointmentId: String(appointment._id),
+                        incidentType: emergencyCase.incidentType,
+                        severity: emergencyCase.severity,
+                        assignedHospital: emergencyCase.assignedHospital || null,
+                    },
+                });
+
+                const socketPayload = {
+                    emergencyCaseId: String(emergencyCase._id),
+                    status: emergencyCase.status,
+                    severity: emergencyCase.severity,
+                    incidentType: emergencyCase.incidentType,
+                    patientId: String(patientId),
+                    assignedHospital: emergencyCase.assignedHospital || null,
+                    linkedAppointmentId: String(appointment._id),
+                    createdBy: patientId,
+                };
+
+                try {
+                    const io = socket.getIO();
+                    io.emit("emergency-created", socketPayload);
+                    io.to(String(patientId)).emit("emergency-created", socketPayload);
+                    io.to(String(doctorId)).emit("emergency-created", socketPayload);
+                    io.emit("hospital-emergency-alert", {
+                        emergencyCaseId: String(emergencyCase._id),
+                        status: "REPORTED",
+                        assignedHospital: emergencyCase.assignedHospital || null,
+                        patientId: String(patientId),
+                        severity: emergencyCase.severity,
+                    });
+                } catch (sockErr) {
+                    console.warn("[bookAppointment] Emergency socket emit skipped:", sockErr.message);
+                }
+            } catch (postCommitErr) {
+                console.error("[bookAppointment] Post-commit emergency attach failed:", postCommitErr.message);
+            }
+        }
+
+        const responseData = appointment.toObject ? appointment.toObject() : appointment;
+        if (emergencyCasePayload) {
+            responseData.emergencyCase = emergencyCasePayload;
+        }
+
+        res.status(201).json({ success: true, data: responseData });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();

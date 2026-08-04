@@ -5,6 +5,58 @@ const User = require("../users/models/user.model");
 const { logAction } = require("../audit/service");
 const socket = require("../../core/socket");
 
+const LIFECYCLE_ORDER = [
+  "REPORTED",
+  "AMBULANCE_REQUESTED",
+  "AMBULANCE_ASSIGNED",
+  "AMBULANCE_ARRIVED",
+  "PATIENT_IDENTIFIED",
+  "IN_TRANSIT",
+  "HOSPITAL_PREPARED",
+  "ARRIVED_AT_HOSPITAL",
+  "UNDER_TREATMENT",
+  "CLOSED",
+];
+
+const VALID_TRANSITIONS = {
+  REPORTED: ["AMBULANCE_REQUESTED", "CANCELLED"],
+  AMBULANCE_REQUESTED: ["AMBULANCE_ASSIGNED", "REPORTED", "CANCELLED"],
+  AMBULANCE_ASSIGNED: ["AMBULANCE_ARRIVED", "AMBULANCE_REQUESTED", "CANCELLED"],
+  AMBULANCE_ARRIVED: ["PATIENT_IDENTIFIED", "AMBULANCE_ASSIGNED"],
+  PATIENT_IDENTIFIED: ["IN_TRANSIT", "AMBULANCE_ARRIVED"],
+  IN_TRANSIT: ["HOSPITAL_PREPARED", "ARRIVED_AT_HOSPITAL", "PATIENT_IDENTIFIED"],
+  HOSPITAL_PREPARED: ["ARRIVED_AT_HOSPITAL", "IN_TRANSIT"],
+  ARRIVED_AT_HOSPITAL: ["UNDER_TREATMENT", "HOSPITAL_PREPARED"],
+  UNDER_TREATMENT: ["CLOSED", "ARRIVED_AT_HOSPITAL"],
+  CLOSED: [],
+  CANCELLED: [],
+};
+
+const isTerminalStatus = (status) => status === "CLOSED" || status === "CANCELLED";
+
+const isValidStatusTransition = (fromStatus, toStatus) => {
+  if (fromStatus === toStatus) return true;
+  const allowed = VALID_TRANSITIONS[fromStatus];
+  return !!allowed && allowed.includes(toStatus);
+};
+
+const assertValidStatusTransition = (fromStatus, toStatus) => {
+  if (isTerminalStatus(fromStatus) && fromStatus !== toStatus) {
+    const err = new Error(`Illegal transition: ${fromStatus} is terminal and cannot be changed`);
+    err.statusCode = 400;
+    throw err;
+  }
+  if (!isValidStatusTransition(fromStatus, toStatus)) {
+    const allowed = VALID_TRANSITIONS[fromStatus] || [];
+    const allowedStr = allowed.length > 0 ? allowed.join(", ") : "(none)";
+    const err = new Error(
+      `Illegal status transition ${fromStatus} → ${toStatus}. Allowed from ${fromStatus}: ${allowedStr}`
+    );
+    err.statusCode = 400;
+    throw err;
+  }
+};
+
 const buildAccessQuery = (user) => {
   const role = user.role;
 
@@ -362,11 +414,7 @@ const updateEmergencyStatus = async ({ user, id, newStatus, ipAddress, cancelled
     }
   }
 
-  if (emergencyCase.status === "CLOSED" || emergencyCase.status === "CANCELLED") {
-    const err = new Error(`Emergency case is already ${emergencyCase.status.toLowerCase()}`);
-    err.statusCode = 400;
-    throw err;
-  }
+  assertValidStatusTransition(emergencyCase.status, newStatus);
 
   const oldStatus = emergencyCase.status;
   emergencyCase.status = newStatus;
@@ -597,4 +645,9 @@ module.exports = {
   INCIDENT_TYPES: EmergencyCase.INCIDENT_TYPES,
   SEVERITY_LEVELS: EmergencyCase.SEVERITY_LEVELS,
   STATUSES: EmergencyCase.STATUSES,
+  LIFECYCLE_ORDER,
+  VALID_TRANSITIONS,
+  isTerminalStatus,
+  isValidStatusTransition,
+  assertValidStatusTransition,
 };

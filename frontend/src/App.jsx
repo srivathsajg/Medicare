@@ -27,6 +27,8 @@ import PatientInPatientStatus from './pages/patient/InPatientStatus';
 import PatientBilling from './pages/patient/PatientBilling';
 import PatientSettings from './pages/patient/PatientSettings';
 import EmergencyBooking from './pages/patient/EmergencyBooking';
+import MyEmergencies from './pages/patient/MyEmergencies';
+import EmergencyCaseDetails from './pages/patient/EmergencyCaseDetails';
 import DoctorPatientQRView from './pages/doctor/DoctorPatientQRView';
 
 function App() {
@@ -78,6 +80,8 @@ function App() {
           <Route path="billing" element={<PatientBilling />} />
           <Route path="settings" element={<PatientSettings />} />
           <Route path="emergency" element={<EmergencyBooking />} />
+          <Route path="emergencies" element={<MyEmergencies />} />
+          <Route path="emergencies/:id" element={<EmergencyCaseDetails />} />
         </Route>
 
         {/* ── Pharmacist ── */}

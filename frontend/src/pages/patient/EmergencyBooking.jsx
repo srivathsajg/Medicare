@@ -89,10 +89,31 @@ const EmergencyBookingPage = () => {
             });
 
             if (res.success) {
-                navigate('/patient-dashboard/appointments', { state: { toast: "🚨 Emergency appointment booked and doctor notified!" } });
+                const aptData = res.data || {};
+                const emergencyCase = aptData.emergencyCase;
+                const ecId = emergencyCase?._id;
+
+                if (ecId) {
+                    navigate(`/patient-dashboard/emergencies/${encodeURIComponent(ecId)}`, {
+                        state: {
+                            toast: `🚨 Emergency case opened and response team at ${selectedHospital.hospitalName} notified!`
+                        }
+                    });
+                } else {
+                    navigate('/patient-dashboard/emergencies', {
+                        state: {
+                            toast: "🚨 Emergency booking confirmed — tracking case created."
+                        }
+                    });
+                }
             }
         } catch (error) {
             console.error("Emergency booking failed:", error);
+            const msg =
+                (error && error.response && error.response.data && error.response.data.message) ||
+                (error && error.message) ||
+                "Emergency booking failed. Please try again.";
+            window.alert(msg);
         } finally {
             setBooking(false);
         }
